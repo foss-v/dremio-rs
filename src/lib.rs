@@ -24,7 +24,7 @@ impl Client {
     /// use dremio_rs::Client;
     /// #[tokio::main]
     /// async fn main() {
-    ///    let mut client = Client::new("http://localhost:9047", "dremio", "dremio123").await.unwrap();
+    ///    let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
     /// }
     /// ```
     pub async fn new(url: &str, user: &str, pass: &str) -> Result<Self> {
