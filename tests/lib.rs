@@ -42,7 +42,7 @@ async fn test_dremio() {
         panic!("Failed to create first user");
     }
     let flight_url = format!(
-        "grpc://localhost:{}",
+        "http://localhost:{}",
         container.get_host_port_ipv4(32010).await.unwrap()
     );
     let mut dremio_client = DremioClient::new(&flight_url, user, pass).await.unwrap();
