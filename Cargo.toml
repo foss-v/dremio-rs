@@ -9,7 +9,7 @@ arrow = "53.0.0"
 arrow-flight = { version = "53.0.0", features = ["flight-sql-experimental"] }
 futures = "0.3.30"
 parquet = "53.0.0"
-tonic = "0.12.2"
+tonic = "0.12.3"
 
 [dev-dependencies]
 testcontainers = "0.23.1"
