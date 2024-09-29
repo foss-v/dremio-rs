@@ -1,7 +1,9 @@
 [package]
+description = "Dremio Rust client"
+edition = "2021"
+license = "MIT"
 name = "dremio-rs"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
 anyhow = "1.0.89"
