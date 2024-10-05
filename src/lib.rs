@@ -7,8 +7,7 @@ use tonic::transport::{Channel, Endpoint};
 
 /// A client for interacting with Dremio's Flight SQL service
 /// This client is a wrapper around the [`FlightSqlServiceClient`] and provides
-/// functionality for returning a [`Vec<RecordBatch>`] from a SQL query
-/// as well as writing parquet files from a SQL query
+/// functionality for executing SQL queries against a Dremio coordinator
 pub struct Client {
     flight_sql_service_client: FlightSqlServiceClient<Channel>,
 }
@@ -37,6 +36,20 @@ impl Client {
     }
 
     /// get a [`Vec<RecordBatch>`] from a SQL query
+    /// # Arguments
+    /// * `query` - The SQL query to execute
+    /// # Example
+    /// ```no_run
+    /// use dremio_rs::Client;
+    /// #[tokio::main]
+    /// async fn main() {
+    ///   let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
+    ///   let batches = client.get_record_batches("SELECT * FROM my_table").await.unwrap();
+    ///   for batch in batches {
+    ///     println!("{:?}", batch);
+    ///   }
+    /// }
+    /// ```
     pub async fn get_record_batches(&mut self, query: &str) -> Result<Vec<RecordBatch>> {
         let flight_info = self
             .flight_sql_service_client
@@ -56,6 +69,18 @@ impl Client {
     }
 
     /// write a parquet file from a SQL query
+    /// # Arguments
+    /// * `query` - The SQL query to execute
+    /// * `path` - The path to write the parquet file to
+    /// # Example
+    /// ```no_run
+    /// use dremio_rs::Client;
+    /// #[tokio::main]
+    /// async fn main() {
+    ///  let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
+    ///  client.write_parquet("SELECT * FROM my_table", "my_table.parquet").await.unwrap();
+    /// }
+    /// ```
     pub async fn write_parquet(&mut self, query: &str, path: &str) -> Result<()> {
         let batches = self.get_record_batches(query).await?;
         let file = std::fs::File::create(path)?;
