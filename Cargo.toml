@@ -8,7 +8,7 @@ repository = "https://github.com/vrd83/dremio-rs"
 
 [dependencies]
 anyhow = "1.0.93"
-arrow = "53.1.0"
+arrow = "53.3.0"
 arrow-flight = { version = "53.3.0", features = ["flight-sql-experimental"] }
 futures = "0.3.31"
 parquet = "53.3.0"

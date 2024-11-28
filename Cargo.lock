@@ -78,9 +78,9 @@ checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
 
 [[package]]
 name = "arrow"
-version = "53.1.0"
+version = "53.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9ba0d7248932f4e2a12fb37f0a2e3ec82b3bdedbac2a1dce186e036843b8f8c"
+checksum = "c91839b07e474b3995035fd8ac33ee54f9c9ccbbb1ea33d9909c71bffdf1259d"
 dependencies = [
  "arrow-arith",
  "arrow-array",
@@ -161,9 +161,9 @@ dependencies = [
 
 [[package]]
 name = "arrow-csv"
-version = "53.1.0"
+version = "53.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3a4e4d63830a341713e35d9a42452fbc6241d5f42fa5cf6a4681b8ad91370c4"
+checksum = "789b2af43c1049b03a8d088ff6b2257cdcea1756cd76b174b1f2600356771b97"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
@@ -234,9 +234,9 @@ dependencies = [
 
 [[package]]
 name = "arrow-json"
-version = "53.1.0"
+version = "53.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b198b9c6fcf086501730efbbcb483317b39330a116125af7bb06467d04b352a3"
+checksum = "b66ff2fedc1222942d0bd2fd391cb14a85baa3857be95c9373179bd616753b85"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
