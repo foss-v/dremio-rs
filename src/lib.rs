@@ -1,9 +1,27 @@
-use anyhow::Result;
 use arrow::array::RecordBatch;
+use arrow::error::ArrowError;
+use arrow_flight::error::FlightError;
 use arrow_flight::sql::client::FlightSqlServiceClient;
 use futures::stream::StreamExt;
 use parquet::arrow::ArrowWriter;
-use tonic::transport::{Channel, Endpoint};
+use parquet::errors::ParquetError;
+use std::io::Error as IoError;
+use thiserror::Error;
+use tonic::transport::{Channel, Endpoint, Error as TonicError};
+
+#[derive(Error, Debug)]
+pub enum DremioClientError {
+    #[error("Tonic Error: {0}")]
+    TonicError(#[from] TonicError),
+    #[error("Arrow Error: {0}")]
+    ArrowError(#[from] ArrowError),
+    #[error("Flight Error: {0}")]
+    FlightError(#[from] FlightError),
+    #[error("IO Error: {0}")]
+    IoError(#[from] IoError),
+    #[error("Parquet Error: {0}")]
+    ParquetError(#[from] ParquetError),
+}
 
 /// A client for interacting with Dremio's Flight SQL service
 /// This client is a wrapper around the [`FlightSqlServiceClient`] and provides
@@ -26,7 +44,7 @@ impl Client {
     ///    let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
     /// }
     /// ```
-    pub async fn new(url: &str, user: &str, pass: &str) -> Result<Self> {
+    pub async fn new(url: &str, user: &str, pass: &str) -> Result<Self, DremioClientError> {
         let mut client =
             FlightSqlServiceClient::new(Endpoint::from_shared(url.to_string())?.connect().await?);
         client.handshake(user, pass).await?;
@@ -50,7 +68,10 @@ impl Client {
     ///   }
     /// }
     /// ```
-    pub async fn get_record_batches(&mut self, query: &str) -> Result<Vec<RecordBatch>> {
+    pub async fn get_record_batches(
+        &mut self,
+        query: &str,
+    ) -> Result<Vec<RecordBatch>, DremioClientError> {
         let flight_info = self
             .flight_sql_service_client
             .execute(query.to_string(), None)
@@ -81,7 +102,11 @@ impl Client {
     ///  client.write_parquet("SELECT * FROM my_table", "my_table.parquet").await.unwrap();
     /// }
     /// ```
-    pub async fn write_parquet(&mut self, query: &str, path: &str) -> Result<()> {
+    pub async fn write_parquet(
+        &mut self,
+        query: &str,
+        path: &str,
+    ) -> Result<(), DremioClientError> {
         let batches = self.get_record_batches(query).await?;
         let file = std::fs::File::create(path)?;
         let mut writer = ArrowWriter::try_new(file, batches[0].schema(), None)?;
