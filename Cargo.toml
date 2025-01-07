@@ -7,14 +7,14 @@ version = "0.2.0"
 repository = "https://github.com/vrd83/dremio-rs"
 
 [dependencies]
-arrow = "53.3.0"
-arrow-flight = { version = "53.3.0", features = ["flight-sql-experimental"] }
+arrow = "54.0.0"
+arrow-flight = { version = "54.0.0", features = ["flight-sql-experimental"] }
 futures = "0.3.31"
-parquet = "53.3.0"
+parquet = "54.0.0"
 thiserror = "2.0.9"
 tonic = "0.12.3"
 
 [dev-dependencies]
 testcontainers = "0.23.1"
 tokio = { version = "1.42.0", features = ["full"] }
-reqwest = "0.12.9"
+reqwest = "0.12.12"
