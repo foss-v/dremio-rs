@@ -1627,9 +1627,9 @@ dependencies = [
 
 [[package]]
 name = "parquet"
-version = "54.0.0"
+version = "54.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3334c50239d9f4951653d84fa6f636da86f53742e5e5849a30fbe852f3ff4383"
+checksum = "f88838dca3b84d41444a0341b19f347e8098a3898b0f21536654b8b799e11abd"
 dependencies = [
  "ahash",
  "arrow-array",
@@ -1651,6 +1651,7 @@ dependencies = [
  "num-bigint",
  "paste",
  "seq-macro",
+ "simdutf8",
  "snap",
  "thrift",
  "twox-hash",
@@ -2188,6 +2189,12 @@ checksum = "a9e9e0b4211b72e7b8b6e85c807d36c212bdb33ea8587f7569562a84df5465b1"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "simdutf8"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 
 [[package]]
 name = "slab"
