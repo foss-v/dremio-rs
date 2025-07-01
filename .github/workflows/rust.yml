@@ -49,4 +49,4 @@ jobs:
         git add CHANGELOG.md
         git commit -m "docs(changelog): Update CHANGELOG.md" || echo "No changes to CHANGELOG.md"
         # Run cargo release to bump version, create tag, push, and publish
-        cargo release --execute --no-dev-version
+        cargo release --execute
