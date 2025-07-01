@@ -25,13 +25,13 @@
 //!     let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await?;
 //!
 //!     // Execute a query and get record batches
-//!     let batches = client.get_record_batches("SELECT * FROM "@dremio"."sys.version"").await?;
+//!     let batches = client.get_record_batches("SELECT * FROM sys.options").await?;
 //!     for batch in batches {
 //!         println!("RecordBatch: {:?}", batch);
 //!     }
 //!
 //!     // Write query results to a Parquet file
-//!     client.write_parquet("SELECT * FROM "@dremio"."sys.version"", "version.parquet").await?;
+//!     client.write_parquet("SELECT * FROM sys.options", "sys_options.parquet").await?;
 //!
 //!     Ok(())
 //! }
@@ -131,7 +131,7 @@ impl Client {
     /// #[tokio::main]
     /// async fn main() {
     ///   let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
-    ///   let batches = client.get_record_batches("SELECT * FROM "@dremio"."sys.version"").await.unwrap();
+    ///   let batches = client.get_record_batches("SELECT * FROM sys.options").await.unwrap();
     ///   for batch in batches {
     ///     println!("{:?}", batch);
     ///   }
@@ -180,7 +180,7 @@ impl Client {
     /// #[tokio::main]
     /// async fn main() {
     ///  let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
-    ///  client.write_parquet("SELECT * FROM my_table", "my_table.parquet").await.unwrap();
+    ///  client.write_parquet("SELECT * FROM sys.options", "my_table.parquet").await.unwrap();
     /// }
     /// ```
     pub async fn write_parquet(
@@ -210,4 +210,3 @@ impl Client {
         &self.flight_sql_service_client
     }
 }
-
