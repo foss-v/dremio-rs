@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2](https://github.com/foss-v/dremio-rs/compare/v0.2.1...v0.2.2) - 2026-01-20
+
+### Other
+
+- update repo
+
 ## [0.2.1](https://github.com/foss-v/dremio-rs/compare/v0.2.0...v0.2.1) - 2026-01-20
 
 ### Added
