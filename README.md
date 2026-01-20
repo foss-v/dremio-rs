@@ -23,7 +23,7 @@ Add `dremio-rs` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-dremio-rs = "0.1.0" # Use the latest version
+dremio-rs = "0.2.2" # Use the latest version
 ```
 
 ### Usage
@@ -38,13 +38,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await?;
 
     // Execute a query and get record batches
-    let batches = client.get_record_batches("SELECT * FROM "@dremio"."sys.version"").await?;
+    let batches = client.get_record_batches("SELECT * FROM sys.options").await?;
     for batch in batches {
         println!("RecordBatch: {:?}", batch);
     }
 
     // Write query results to a Parquet file
-    client.write_parquet("SELECT * FROM "@dremio"."sys.version"", "version.parquet").await?;
+    client.write_parquet("SELECT * FROM sys.options", "sys_options.parquet").await?;
 
     Ok(())
 }
