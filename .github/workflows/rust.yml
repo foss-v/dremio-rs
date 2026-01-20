@@ -25,28 +25,22 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # Required for git-cliff to analyze history
-    - name: Install git-cliff
-      run: cargo install git-cliff
-    - name: Install cargo-release
-      run: cargo install cargo-release
+        fetch-depth: 0
+    - uses: dtolnay/rust-toolchain@stable
     - name: Configure Git
       run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-    - name: Automated Release
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+    - name: Run cargo-release
+      uses: crate-ci/cargo-release@v2
+      with:
+        command: release
+        args: --execute --no-confirm
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Generate changelog before release
-        # Install jq for parsing Cargo.toml version
-        sudo apt-get update && sudo apt-get install -y jq
-        git cliff --output CHANGELOG.md --latest --tag $(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
-        git add CHANGELOG.md
-        git commit -m "docs(changelog): Update CHANGELOG.md" || echo "No changes to CHANGELOG.md"
-        # Run cargo release to bump version, create tag, push, and publish
-        cargo release --execute
