@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4](https://github.com/foss-v/dremio-rs/compare/v0.2.3...v0.2.4) - 2026-02-03
+
+### Other
+
+- *(deps)* bump tonic from 0.14.2 to 0.14.3
+
 ## [0.2.3](https://github.com/foss-v/dremio-rs/compare/v0.2.2...v0.2.3) - 2026-01-20
 
 ### Other
