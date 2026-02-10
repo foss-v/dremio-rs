@@ -7,7 +7,7 @@ version = "0.2.4"
 repository = "https://github.com/foss-v/dremio-rs"
 
 [dependencies]
-arrow = "57.2.0"
+arrow = "57.3.0"
 arrow-flight = { version = "57.3.0", features = ["flight-sql-experimental"] }
 futures = "0.3.31"
 parquet = "57.3.0"
