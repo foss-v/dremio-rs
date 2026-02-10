@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/foss-v/dremio-rs/compare/v0.2.4...v0.2.5) - 2026-02-10
+
+### Other
+
+- *(deps)* bump parquet from 57.2.0 to 57.3.0
+- *(deps)* bump arrow-flight from 57.2.0 to 57.3.0
+
 ## [0.2.4](https://github.com/foss-v/dremio-rs/compare/v0.2.3...v0.2.4) - 2026-02-03
 
 ### Other
