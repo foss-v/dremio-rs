@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.6](https://github.com/foss-v/dremio-rs/compare/v0.2.5...v0.2.6) - 2026-02-11
+
+### Other
+
+- *(deps)* bump testcontainers from 0.26.3 to 0.27.0
+- Merge pull request #103 from foss-v/dependabot/cargo/reqwest-0.13.2
+- Merge pull request #105 from foss-v/release-plz-2026-02-10T07-24-42Z
+
 ## [0.2.5](https://github.com/foss-v/dremio-rs/compare/v0.2.4...v0.2.5) - 2026-02-10
 
 ### Other
