@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/foss-v/dremio-rs/compare/v0.2.6...v0.2.7) - 2026-02-20
+
+### Other
+
+- Merge pull request #108 from foss-v/dependabot/cargo/tonic-0.14.4
+- *(deps)* bump tonic from 0.14.3 to 0.14.4
+
 ## [0.2.6](https://github.com/foss-v/dremio-rs/compare/v0.2.5...v0.2.6) - 2026-02-11
 
 ### Other
