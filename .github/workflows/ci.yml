@@ -14,7 +14,10 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded pull request runs are waste, but a push to main must always
+  # finish: release-plz releases from main, so cancelling here would let a
+  # commit reach crates.io unverified.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   # Everything that does not need a Docker daemon, so formatting and lint
