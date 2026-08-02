@@ -9,3 +9,25 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      # arrow, arrow-flight and parquet share types across the API boundary, so
+      # a version mismatch between them does not compile. Opened as separate
+      # PRs they are individually unmergeable and simply pile up.
+      arrow:
+        patterns:
+          - "arrow"
+          - "arrow-*"
+          - "parquet"
+      # Routine bumps arrive as one PR rather than one each. Majors stay
+      # separate, since those are the ones worth reading.
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Nothing was watching the workflows, which is how actions/checkout sat on v4
+  # in ci.yml while release-plz.yml had already moved to v6.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
