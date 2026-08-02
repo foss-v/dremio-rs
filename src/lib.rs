@@ -22,7 +22,7 @@
 //! store, which the `tls` feature enables as a pair:
 //!
 //! ```toml
-//! dremio-rs = { version = "0.2", features = ["tls"] }
+//! dremio-rs = { version = "0.3", features = ["tls"] }
 //! ```
 //!
 //! `tls` is shorthand for `tls-ring` and `tls-webpki-roots`. Providers
