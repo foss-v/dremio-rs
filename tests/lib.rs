@@ -1,9 +1,9 @@
 use dremio_rs::Client as DremioClient;
 use reqwest::Client as HttpClient;
 use testcontainers::{
+    GenericImage,
     core::{IntoContainerPort, WaitFor},
     runners::AsyncRunner,
-    GenericImage,
 };
 
 #[tokio::test]

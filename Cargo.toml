@@ -1,20 +1,39 @@
 [package]
 description = "Dremio Rust client"
-edition = "2021"
+edition = "2024"
 license = "MIT"
 name = "dremio-rs"
 version = "0.2.7"
 repository = "https://github.com/foss-v/dremio-rs"
+readme = "README.md"
+keywords = ["dremio", "flight-sql", "arrow", "parquet", "sql"]
+categories = ["database", "api-bindings", "asynchronous"]
+rust-version = "1.88"
+
+[features]
+default = []
+# Connect to TLS-secured Dremio endpoints (`grpc+tls://`, `https://`). Pick a
+# crypto provider and a root store; `tls` is the usual pairing of the two.
+tls = ["tls-ring", "tls-webpki-roots"]
+tls-aws-lc = ["arrow-flight/tls-aws-lc"]
+tls-native-roots = ["arrow-flight/tls-native-roots"]
+tls-ring = ["arrow-flight/tls-ring"]
+tls-webpki-roots = ["arrow-flight/tls-webpki-roots"]
 
 [dependencies]
-arrow = "57.3.0"
-arrow-flight = { version = "57.3.0", features = ["flight-sql-experimental"] }
-futures = "0.3.32"
-parquet = "57.3.0"
-thiserror = "2.0.18"
-tonic = "0.14.5"
+arrow = "59.1.0"
+arrow-flight = { version = "59.1.0", features = ["flight-sql-experimental"] }
+futures = "0.3.33"
+parquet = "59.1.0"
+thiserror = "2.0.19"
+tonic = "0.14.6"
 
 [dev-dependencies]
-testcontainers = "0.27.1"
-tokio = { version = "1.49.0", features = ["full"] }
-reqwest = "0.13.2"
+prost = "0.14.4"
+testcontainers = "0.27.3"
+tokio = { version = "1.53.1", features = ["full"] }
+tokio-stream = { version = "0.1.18", features = ["net"] }
+reqwest = "0.13.4"
+
+[package.metadata.docs.rs]
+all-features = true
