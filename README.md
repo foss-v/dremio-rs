@@ -80,8 +80,9 @@ Contributions are welcome. Before opening a pull request:
 ```bash
 cargo fmt --all
 cargo clippy --all-targets --features tls -- -D warnings
-cargo test --lib --doc --test flight_sql   # fast, no Docker needed
-cargo test --test lib                      # integration test, needs Docker
+cargo test --lib --test flight_sql   # fast, no Docker needed
+cargo test --doc
+cargo test --test lib                # integration test, needs Docker
 ```
 
 The integration test boots `dremio/dremio-oss` with testcontainers. Dremio asks
