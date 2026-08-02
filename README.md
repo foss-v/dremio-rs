@@ -27,7 +27,7 @@ Add `dremio-rs` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-dremio-rs = "0.2"
+dremio-rs = "0.3"
 ```
 
 ### Usage
@@ -66,7 +66,7 @@ enabled, since that pulls in a crypto provider and a root certificate store:
 
 ```toml
 [dependencies]
-dremio-rs = { version = "0.2", features = ["tls"] }
+dremio-rs = { version = "0.3", features = ["tls"] }
 ```
 
 `tls` is shorthand for `tls-ring` plus `tls-webpki-roots`. To choose your own
