@@ -15,6 +15,20 @@
 //! - Retrieve query results as `Vec<RecordBatch>`.
 //! - Write query results to Parquet files.
 //!
+//! # Cargo features
+//!
+//! Plaintext connections need no features. Reaching a TLS-secured coordinator
+//! (`grpc+tls://`, `https://`) needs a crypto provider and a root certificate
+//! store, which the `tls` feature enables as a pair:
+//!
+//! ```toml
+//! dremio-rs = { version = "0.2", features = ["tls"] }
+//! ```
+//!
+//! `tls` is shorthand for `tls-ring` and `tls-webpki-roots`. Providers
+//! (`tls-ring`, `tls-aws-lc`) and root stores (`tls-webpki-roots`,
+//! `tls-native-roots`) can also be picked individually.
+//!
 //! # Example
 //!
 //! ```no_run
@@ -38,13 +52,16 @@
 //! ```
 
 use arrow::array::RecordBatch;
+use arrow::datatypes::SchemaRef;
 use arrow::error::ArrowError;
 use arrow_flight::error::FlightError;
 use arrow_flight::sql::client::FlightSqlServiceClient;
 use futures::stream::StreamExt;
 use parquet::arrow::ArrowWriter;
 use parquet::errors::ParquetError;
+use std::fs::File;
 use std::io::Error as IoError;
+use std::sync::Arc;
 use thiserror::Error;
 use tonic::transport::{Channel, Endpoint, Error as TonicError};
 
@@ -66,6 +83,14 @@ pub enum DremioClientError {
     /// An error originating from the `parquet` file format library.
     #[error("Parquet Error: {0}")]
     ParquetError(#[from] ParquetError),
+    /// Dremio described an endpoint holding part of the result set but did not
+    /// attach a ticket for retrieving it, so that data cannot be fetched.
+    #[error("Flight endpoint has no ticket")]
+    MissingTicket,
+    /// The query returned no data and Dremio supplied no schema for it, so
+    /// there is nothing to describe the columns of an empty Parquet file.
+    #[error("Query returned neither data nor a schema")]
+    MissingSchema,
 }
 
 /// A client for interacting with Dremio's Flight SQL service.
@@ -73,6 +98,7 @@ pub enum DremioClientError {
 /// This client wraps the `FlightSqlServiceClient` and provides a simplified
 /// interface for common operations such as executing SQL queries and
 /// retrieving data as Arrow `RecordBatch`es, or writing them to Parquet files.
+#[derive(Debug)]
 pub struct Client {
     flight_sql_service_client: FlightSqlServiceClient<Channel>,
 }
@@ -113,6 +139,13 @@ impl Client {
 
     /// Executes a SQL query against Dremio and retrieves the results as a vector of `RecordBatch`es.
     ///
+    /// Dremio may split a result set across several Flight endpoints; every one
+    /// of them is read, in order, into the returned vector.
+    ///
+    /// The whole result set is held in memory. For exports large enough that
+    /// this matters, prefer [`Client::write_parquet`], which streams straight to
+    /// disk.
+    ///
     /// # Arguments
     ///
     /// * `query` - The SQL query string to execute.
@@ -120,7 +153,8 @@ impl Client {
     /// # Returns
     ///
     /// A `Result` which is:
-    /// - `Ok(Vec<RecordBatch>)` containing the query results if successful.
+    /// - `Ok(Vec<RecordBatch>)` containing the query results if successful. A
+    ///   query that matches no rows yields an empty vector.
     /// - `Err(DremioClientError)` if an error occurs during query execution or data retrieval.
     ///
     /// # Example
@@ -145,20 +179,27 @@ impl Client {
             .flight_sql_service_client
             .execute(query.to_string(), None)
             .await?;
-        let ticket = flight_info.endpoint[0]
-            .ticket
-            .clone()
-            .expect("Missing ticket");
-        let mut stream = self.flight_sql_service_client.do_get(ticket).await?;
         let mut batches = Vec::new();
 
-        while let Some(batch) = stream.next().await {
-            batches.push(batch?);
+        for endpoint in flight_info.endpoint {
+            let ticket = endpoint.ticket.ok_or(DremioClientError::MissingTicket)?;
+            let mut stream = self.flight_sql_service_client.do_get(ticket).await?;
+            while let Some(batch) = stream.next().await {
+                batches.push(batch?);
+            }
         }
         Ok(batches)
     }
 
     /// Executes a SQL query and writes the results directly to a Parquet file.
+    ///
+    /// Batches are streamed to disk as they arrive rather than collected first,
+    /// so memory use stays flat regardless of how large the result set is.
+    ///
+    /// A query matching no rows still produces a valid Parquet file carrying the
+    /// query's schema and no rows. The file is created only once the query has
+    /// succeeded, but a failure part-way through streaming leaves the partial
+    /// file behind at `path`.
     ///
     /// # Arguments
     ///
@@ -188,25 +229,94 @@ impl Client {
         query: &str,
         path: &str,
     ) -> Result<(), DremioClientError> {
-        let batches = self.get_record_batches(query).await?;
-        let file = std::fs::File::create(path)?;
-        let mut writer = ArrowWriter::try_new(file, batches[0].schema(), None)?;
-        for batch in batches {
-            writer.write(&batch)?;
+        let mut flight_info = self
+            .flight_sql_service_client
+            .execute(query.to_string(), None)
+            .await?;
+        let endpoints = std::mem::take(&mut flight_info.endpoint);
+        // Created from the first batch's schema, so an entirely empty result set
+        // leaves this `None` and falls back to the schema Dremio advertised.
+        let mut writer: Option<ArrowWriter<File>> = None;
+        let mut schema: Option<SchemaRef> = None;
+
+        for endpoint in endpoints {
+            let ticket = endpoint.ticket.ok_or(DremioClientError::MissingTicket)?;
+            let mut stream = self.flight_sql_service_client.do_get(ticket).await?;
+            while let Some(batch) = stream.next().await {
+                let batch = batch?;
+                if writer.is_none() {
+                    writer = Some(ArrowWriter::try_new(
+                        File::create(path)?,
+                        batch.schema(),
+                        None,
+                    )?);
+                }
+                if let Some(writer) = writer.as_mut() {
+                    writer.write(&batch)?;
+                }
+            }
+            if schema.is_none() {
+                schema = stream.schema().cloned();
+            }
         }
+
+        let writer = match writer {
+            Some(writer) => writer,
+            None => {
+                let schema = match schema {
+                    Some(schema) => schema,
+                    None => Arc::new(
+                        flight_info
+                            .try_decode_schema()
+                            .map_err(|_| DremioClientError::MissingSchema)?,
+                    ),
+                };
+                ArrowWriter::try_new(File::create(path)?, schema, None)?
+            }
+        };
         writer.close()?;
         Ok(())
     }
 
     /// Returns a shared reference to the underlying `FlightSqlServiceClient`.
     ///
-    /// This can be used to access more advanced Flight SQL operations not directly
-    /// exposed by the `Client` interface.
+    /// Most Flight SQL operations need `&mut self`; use [`Client::inner_mut`] to
+    /// call those.
     ///
     /// # Returns
     ///
     /// A reference to the `FlightSqlServiceClient<Channel>`.
     pub fn inner(&self) -> &FlightSqlServiceClient<Channel> {
         &self.flight_sql_service_client
+    }
+
+    /// Returns a mutable reference to the underlying `FlightSqlServiceClient`.
+    ///
+    /// This is the escape hatch for the Flight SQL operations this wrapper does
+    /// not expose — prepared statements, catalog metadata, `execute_update` and
+    /// so on — all of which take `&mut self`.
+    ///
+    /// # Returns
+    ///
+    /// A mutable reference to the `FlightSqlServiceClient<Channel>`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use dremio_rs::Client;
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///   let mut client = Client::new("http://localhost:32010", "dremio", "dremio123").await.unwrap();
+    ///   let rows = client
+    ///     .inner_mut()
+    ///     .execute_update("DROP TABLE IF EXISTS scratch.tmp".to_string(), None)
+    ///     .await
+    ///     .unwrap();
+    ///   println!("{rows} rows affected");
+    /// }
+    /// ```
+    pub fn inner_mut(&mut self) -> &mut FlightSqlServiceClient<Channel> {
+        &mut self.flight_sql_service_client
     }
 }
