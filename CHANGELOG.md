@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0](https://github.com/foss-v/dremio-rs/compare/v0.2.7...v0.3.0) - 2026-08-02
+
+### Fixed
+
+- *(ci)* run doctests in their own step
+- return errors instead of panicking on unexpected responses
+
+### Other
+
+- *(deps)* group the arrow crates and watch the workflows
+- refresh README for TLS, install drift and contributing
+- gate formatting and lint, split the Docker-backed test
+- cover result shapes with an in-process Flight SQL server
+- *(deps)* [**breaking**] update dependencies, edition 2024 and TLS features
+- Merge pull request #114 from foss-v/dependabot/cargo/testcontainers-0.27.1
+- *(deps)* bump testcontainers from 0.27.0 to 0.27.1
+
 ## [0.2.7](https://github.com/foss-v/dremio-rs/compare/v0.2.6...v0.2.7) - 2026-02-20
 
 ### Other
