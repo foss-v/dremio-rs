@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1](https://github.com/foss-v/dremio-rs/compare/v0.3.0...v0.3.1) - 2026-08-11
+
+### Fixed
+
+- *(ci)* let pushes to main finish instead of cancelling them
+
+### Other
+
+- Merge pull request #128 from foss-v/dependabot/cargo/minor-and-patch-d0e7bbee68
+- *(deps)* bump testcontainers from 0.27.3 to 0.28.0
+- track CLAUDE.md and point install snippets at 0.3
+
 ## [0.3.0](https://github.com/foss-v/dremio-rs/compare/v0.2.7...v0.3.0) - 2026-08-02
 
 ### Fixed
